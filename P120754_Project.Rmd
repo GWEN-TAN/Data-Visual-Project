@@ -134,7 +134,7 @@ renderPlot({
 ```
 
 > 
-> Retrieved from: https://www.chocolate-advisor.com/guides/chocolate-nutrition-facts
+> Source of data: Chocolate Advisor, Retrieved from: https://www.chocolate-advisor.com/guides/chocolate-nutrition-facts
 
 ***
 - The common types of chocolate in the market are Dark Chocolate with 40% of Cocoa, 
