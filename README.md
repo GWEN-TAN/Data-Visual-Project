@@ -1,4 +1,4 @@
-# UKM-Data-Visual-Project
+# Data-Visual-Project
 
 ## About the project
 This is an individual project under the course Data Visualization & Communication.
@@ -19,38 +19,38 @@ The frames in Malaysia page are about export, import and the production of cocoa
 ## About dataset and its source
 The dataset were scapped or downloaded from these websites:
 
-cocoa.csv - Worldwide cocoa production (tons)\
-The file is extracted from FAOSTAT_data_en_7-10-2023.csv directly downloaded from website\
+**cocoa.csv** - Worldwide cocoa production (tons)\
+The file is extracted from **FAOSTAT_data_en_7-10-2023.csv** directly downloaded from website\
 Source of data: Food and Agriculture Organization of the United Nations\
 Retrieved from: https://www.fao.org/faostat/en/#data/QCL
 
-nutrients.csv - Chocolate Nutrition Facts\
+**nutrients.csv** - Chocolate Nutrition Facts\
 Source of data: Chocolate Advisor\
 Retrieved from: https://www.chocolate-advisor.com/guides/chocolate-nutrition-facts
 
-choc_products.csv - Product with Chocolate Nutrition Facts\
+**choc_products.csv** - Product with Chocolate Nutrition Facts\
 Source of data: Selina Wamucii\
 Retrieved from: https://www.selinawamucii.com/nutrition/?s=chocolate&post_type=product \
 21 pages As of 11 July 2023
 
-choco_bar.csv - Selected information about chocolate bars in the world\
-The file is extracted from wpd_choc.csv which was directly copied from website\
+**choco_bar.csv** - Selected information about chocolate bars in the world\
+The file is extracted from **wpd_choc.csv** which was directly copied from website\
 Source of data: Flavors of Cacao\
 Retrieved from: http://flavorsofcacao.com/chocolate_database.html \
 Updated on: June 17, 2023
 
-export_beans.csv - Export of Cocoa Beans by Malaysia\
+**export_beans.csv** - Export of Cocoa Beans by Malaysia\
 Source of data: Department of Statistics Malaysia\
 Retrieved from: https://www.koko.gov.my/lkm/industry/statistic/export.cfm
 
-import_beans.csv - Import of Cocoa Beans by Malaysia\
+**import_beans.csv** - Import of Cocoa Beans by Malaysia\
 Source of data: Department of Statistics Malaysia\
 Retrieved from: https://www.koko.gov.my/lkm/industry/statistic/import.cfm
 
-region_data.csv - Production (Tonne) Of Cocoa Beans By Region in Malaysia\
+**region_data.csv** - Production (Tonne) Of Cocoa Beans By Region in Malaysia\
 Source of data: Department of Statistic Malaysia, Malaysia Cocoa Board\
 Retrieved from: https://www.koko.gov.my/lkm/industry/statistic/p_cocoabean.cfm
 
-## About R code
-Data_Acq.R is the process to scrap the data from the website.\
-P120754_Project.Rmd is the markdown for the storyboard.
+## About R files
+**Data_Acq.R** is the process to scrap the data from the website.\
+**P120754_Project.Rmd** is the markdown for the storyboard.
