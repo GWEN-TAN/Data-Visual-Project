@@ -1,0 +1,640 @@
+---
+title: "COCOA & CHOCOLATE"
+author: "Tan Su Rong (P120754)"
+output: 
+  flexdashboard::flex_dashboard: 
+   storyboard: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE)
+library(ggplot2)
+library(gganimate)
+library(tidyr)
+library(dplyr)
+library(stringr)
+library(plotly)
+library(tidytext)
+library(wordcloud2)
+```
+
+General {.storyboard}
+======================================
+
+### About Cocoa Beans
+
+
+The beans which have been derived from the Cocoa tree are called Cocoa beans. 
+
+The other common names for Cocoa bean are Cocoa, Cacao and Cacao bean.
+
+It is the key ingredients of making chocolate.
+
+Cocoa is loaded with antioxidants to provide anti-aging properties and high concentration of Epicatechin that is helpful for cardiovascular health. 
+
+Largest exporters of Cocoa beans: Ghana, Cote d’Ivoire, Ecuador, Nigeria and Cameroon
+
+Main importers of Cocoa beans: United States, Netherlands, Belgium-Luxembourg and Malaysia
+
+Reference link: https://www.healthbenefitstimes.com/cocoa-bean/
+
+General:
+
+The storyboard is about the trend of cocoa production in worldwide, 
+the nutrition facts of chocolate types and products with chocolate. 
+
+The next visualizations are about chocolate bars in the world. 
+The content is related to the number of ingredients, cocoa percentage, 
+ratings and characteristics of chocolate bars.
+
+Malaysia:
+
+The frames are about export, import and the production of cocoa beans.
+
+
+
+### World Production of Cocoa Beans
+
+```{r include=FALSE}
+world_prod <- read.csv("cocoa.csv")
+
+world_prod_plot <- 
+  ggplot(data = world_prod, aes(x = Year, y = Total)) +
+  geom_line(colour = "chocolate", size = 1) +
+  geom_point(colour = "chocolate", shape = 3, size = 5) +
+  geom_text(aes(label = Total), vjust = -1, size = 7,
+            colour = "chocolate1", fontface = "bold") +
+  labs(y = "Production (tons)",
+       title = "Worldwide Cocoa Production from 1961 to 2021") +
+  transition_reveal(Year) +
+  theme(plot.title = element_text(face = "bold", colour = "chocolate4", size = 25),
+        axis.text = element_text(face = "bold", size = 18),
+        axis.title = element_text(face = "bold", colour = "chocolate4", size = 20),
+        panel.grid.major = element_line(colour = "bisque"),
+        panel.grid.minor = element_line(colour = "bisque"),
+        panel.background = element_rect(fill = "lightyellow"))
+
+world_prod_plot <- animate(world_prod_plot, width = 1000, height = 800)
+```
+```{r}
+world_prod_plot
+```
+
+> 
+> Source of data: Food and Agriculture Organization of the United Nations, Retrieved from: https://www.fao.org/faostat/en/#data/QCL
+
+***
+- The worldwide production of cocoa beans were recorded from 1961 to 2021. 
+The data collected consist of Official figure, Unofficial figure, 
+Estimated value, Imputed value and even Missing value due to data cannot exist or not applicable.
+
+- The line of total production shows fluctuation throughout the years 
+but the trend shows an increasing pattern.
+
+
+
+### Nutrition Facts of Chcocolate Types
+
+```{r include=FALSE}
+nutrient <- read.csv("nutrients.csv")
+nutrient <- pivot_longer(nutrient, 
+                         cols = c("Black_40", "Black_70", 
+                                  "Milk_Choco", "White_Choco"),
+                         names_to = "Chocolate_Type", values_to = "Value")
+nutrient <- as.data.frame(nutrient)
+nl <- as.list(unique(nutrient$Nutrients))
+```
+
+```{r}
+selectInput("select_nl", label = "Select Nutrients:",
+            choices = nl, selected = "Energy(kcal)")
+```
+
+```{r}
+renderPlot({
+  n <- nutrient[nutrient$Nutrients == input$select_nl,]
+  ggplot(data = n, aes(x = Chocolate_Type, y = Value)) +
+  geom_bar(stat = "identity", fill = "burlywood") +
+  labs(x = "Type of Chocolate", y = input$select_nl,
+       title = paste("Value of", input$select_nl, "in 100g of Each Chocolate Type")) +
+  scale_x_discrete(labels = c("Dark Chocolate \n40% Cocoa", 
+                              "Dark Chocolate \n70% Cocoa", 
+                              "Milk Chocolate", "White Chocolate")) +
+  geom_text(aes(label = round(Value, 2)), 
+            vjust = -0.5, colour = "chocolate",
+            fontface = "bold", size = 7) +
+  theme(plot.title = element_text(face = "bold", colour = "chocolate4", size = 22),
+       # plot.margin = margin(0, 30, 5, 2, "cm"), #(top, right, bottom, left, "unit")
+        axis.text = element_text(face = "bold", size = 16),
+        axis.title = element_text(face = "bold", colour = "chocolate4", size = 18),
+        panel.grid.major = element_line(colour = "bisque"),
+        panel.grid.minor = element_line(colour = "bisque"),
+        panel.background = element_rect(fill = "lightyellow"))
+}, width = 900, height = 650)
+```
+
+> 
+> Retrieved from: https://www.chocolate-advisor.com/guides/chocolate-nutrition-facts
+
+***
+- The common types of chocolate in the market are Dark Chocolate with 40% of Cocoa, 
+Dark Chocolate with 70% of Cocoa, Milk Chocolate and White Chocolate. 
+Their nutritional values are always being compared by people.
+
+- The bar chart illustrates the values of nutritional value for each chocolate type.
+
+- Example: In 100g of Dark Chocolate with 40% of Cocoa, 
+there is only 498kcal of Energy which is the lowest among the four.
+
+
+
+### Nutrition Facts of Product with Chocolate
+
+```{r include=FALSE}
+product <- read.csv("choc_products.csv")
+product <- pivot_longer(product, cols = c("Fat_g", "Carbs_g", "Protein_g"),
+                        names_to = "Nutrients", values_to = "Value")
+product <- as.data.frame(product)
+pl <- as.list(unique(product$Product))
+```
+
+```{r}
+selectInput("select_pl", label = "Select a product:",
+            choices = pl, selected = "Cornmeal Beverage With Chocolate Milk")
+```
+
+```{r}
+renderPlot({
+  p <- product[product$Product == input$select_pl,]
+  ggplot(data = p, aes(x = Nutrients, y = Value)) +
+  geom_bar(stat = "identity", fill = "burlywood") +
+  labs(x = "Nutrients of Products with Chocolate", 
+       y = "Nutritional Value (g)",
+       title = paste("Carbs, Fats and Proteins in \n100g of", input$select_pl)) +
+  geom_text(aes(label = round(Value, 2)), 
+            vjust = -0.3, colour = "chocolate1",
+            fontface = "bold", size = 6) +
+  theme(plot.title = element_text(face = "bold", colour = "chocolate4", size = 20),
+      #  plot.margin = margin(0, 30, 5, 2, "cm"), #(top, right, bottom, left, "unit")
+        axis.text = element_text(face = "bold", size = 14),
+        axis.title = element_text(face = "bold", colour = "chocolate4", size = 16),
+        panel.grid.major = element_line(colour = "bisque"),
+        panel.grid.minor = element_line(colour = "bisque"),
+        panel.background = element_rect(fill = "lightyellow"))
+}, width = 900, height = 650)
+```
+
+> 
+> Source of data: Selina Wamucii , Retrieved from: https://www.selinawamucii.com/nutrition/?s=chocolate&post_type=product, 21 pages As of 11 July 2023
+
+***
+- Chocolate is widely added into food products in the market. 
+
+- The figure displays the value of Carbohydrates, Fat and Protein in the selected product.
+
+- Example: There are 20.98g of carbs, 2.38g of fat and 1.89g of protein in a 
+100g of Cornmeal Beverage With Chocolate Milk.
+
+
+### Number of Ingredients in Chocolate Bar
+
+```{r include=FALSE}
+chocolate <- read.csv("choco_bar.csv")
+ing_no <- subset(chocolate, select = "Ingredients")
+
+ing_no <- na.omit(ing_no)
+ing_no <- as.data.frame(ing_no %>% group_by(Ingredients) %>%
+                          summarise(Total = n()))
+
+ing_no_plot <-
+  ggplot(data = ing_no, aes(x = as.factor(Ingredients), y = Total)) +
+  geom_bar(stat = "identity", fill = "burlywood") +
+  labs(x = "Number of Ingredients in the Chocolate Bar", 
+       y = "Number of Chocolate Bar",
+       title = "Total Number of Chocolate Bars") +
+  geom_text(aes(label = Total), 
+            vjust = -0.3, colour = "chocolate1",
+            fontface = "bold", size = 6) +
+  theme(plot.title = element_text(face = "bold", colour = "chocolate4", size = 24),
+        axis.text = element_text(face = "bold", size = 16),
+        axis.title = element_text(face = "bold", colour = "chocolate4", size = 20),
+        panel.grid.major = element_line(colour = "bisque"),
+        panel.grid.minor = element_line(colour = "bisque"),
+        panel.background = element_rect(fill = "lightyellow"))
+```
+
+```{r}
+renderPlot({ing_no_plot}, width = 1000, height = 700)
+```
+
+> 
+> Source of data: Flavors of Cacao, Retrieved from: http://flavorsofcacao.com/chocolate_database.html, Updated on: June 17, 2023
+
+***
+- The main ingredients in a chocolate bar, except the Beans, could be Sugar, 
+Sweetener other than white cane or beet sugar, Cocoa Butter, Vanilla, Lecithin and Salt.
+
+- There are 1 to 6 types of ingredients combined to make a chocolate bar.
+
+- Among 2,570 types of chocolate bars, 1109 are made of 3 basic ingredients. 
+The combination may be Beans, Sugar or Sweetener and Cocoa Butter or others. 
+
+
+### Number of Ingredients and Cocoa Percentage in Chocolate Bar
+
+```{r include=FALSE}
+chocolate <- read.csv("choco_bar.csv")
+ing_pct <- subset(chocolate, select = c("Cocoa.Percent", "Ingredients"))
+ing_pct <- na.omit(ing_pct)
+ing_pct$Cocoa.Percent <- str_remove_all(ing_pct$Cocoa.Percent, "%")
+ing_pct$Cocoa.Percent <- round(as.numeric(ing_pct$Cocoa.Percent), 2)
+ing_pct <- as.data.frame(ing_pct %>% 
+                        group_by(Ingredients, Cocoa.Percent) %>% 
+                        summarise(Count = n()))
+ipl <- as.list(unique(ing_pct$Ingredients))
+```
+
+```{r}
+selectInput("select_ipl", label = "Number of Ingredients:",
+            choices = ipl, selected = 4)
+```
+
+```{r}
+renderPlotly({
+  ni <- ing_pct[ing_pct$Ingredients == input$select_ipl,]
+  # axes
+  f1 <- list(size = 18, color = "chocolate")
+  f2 <- list(size = 16, color = "black")
+  x <- list(title = "Percentage of Cocoa", titlefont = f1, tickfont = f2)
+  y <- list(title = "Number of Chocolate Bar", titlefont = f1, tickfont = f2)
+
+  # title
+  f3 <- list(size = 20, color = "chocolate4")
+  t <- list(text = paste("Chocolate Bars with", input$select_ipl, "Ingredients"),
+          font = f3)
+
+  # hover
+  h <- list(bgcolor = "lightyellow", bordercolor = "chocolate",
+          font = list(color="black"))
+  
+  plot_ni <- 
+  plot_ly(data = ni, x = ~as.factor(Cocoa.Percent), y = ~Count,
+          hovertemplate = ~paste("Cocoa:", Cocoa.Percent, "%",
+                                 "<br>Count:", Count, "<extra></extra>"),
+          width = 1200, height = 650) %>%
+  add_bars(color = I("burlywood"), name = "") %>%
+  layout(title = t, xaxis = x, yaxis = y, hoverlabel = h,
+         margin = list(l = 50,r = 10, b = 10, t = 50, pad =2))
+
+  plot_ni
+})
+```
+
+> 
+> Source of data: Flavors of Cacao, Retrieved from: http://flavorsofcacao.com/chocolate_database.html, Updated on: June 17, 2023
+
+
+***
+- Different percentage of cocoa can be found in chocolate bars.
+
+- The figure reveals the number of chocolate bars for various cocoa percentage 
+with specific number of ingredients.
+
+- Example: Most chocolate bars with 4 ingredients are with 70% of cocoa.
+
+### Ingredients, Cocoa Percentage & Ratings
+
+```{r include=FALSE}
+chocolate <- read.csv("choco_bar.csv")
+
+rate <- subset(chocolate, select = c("Ingredients", "Cocoa.Percent", "Rating"))
+rate <- na.omit(rate)
+rate$Cocoa.Percent <- str_remove_all(rate$Cocoa.Percent, "%")
+rate$Cocoa.Percent <- round(as.numeric(rate$Cocoa.Percent), 2)
+```
+
+```{r}
+renderPlotly({
+  # axes
+  f1 <- list(size = 18, color = "chocolate")
+  f2 <- list(size = 16, color = "black")
+  x <- list(title = "Ratings of Chocolate Bar", titlefont = f1, tickfont = f2)
+  y <- list(title = "Percentage of Cocoa", titlefont = f1, tickfont = f2)
+
+  # title
+  f3 <- list(size = 20, color = "chocolate4")
+  t <- list(text = "Cocoa Percentage and Ratings of Chocolate Bar",
+            font = f3)
+
+  # legends
+  l <- list(font = list(size = 12), #orientation = "h",
+            title = list(text='<b> Number of Ingredients: </b>'))
+
+  # hover
+  h <- list(bgcolor = "lightyellow", bordercolor = "chocolate",
+            font = list(color="black"))
+
+  mycol <- c("red", "orange", "gold", "green", "dodgerblue", "darkorchid")
+
+  plot_ly(data = rate, x = ~as.numeric(Rating), y = ~as.numeric(Cocoa.Percent),
+          text = ~paste("Cocoa:", Cocoa.Percent, "%",
+                        "<br>Rating:", Rating,
+                        "<br>Number of Ingredients:", Ingredients),
+          mode = "markers", hoverinfo = "text", 
+          width = 1500, height = 700) %>%
+  add_markers(color = ~as.factor(Ingredients), alpha = 0.4,
+              colors = mycol) %>%
+  layout(title = t,
+         xaxis = x, yaxis = y,
+         legend = l, hoverlabel = h,
+         margin = list(l = 50,r = 10, b = 10, t = 50, pad =2))
+})
+```
+
+> 
+> Source of data: Flavors of Cacao, Retrieved from: http://flavorsofcacao.com/chocolate_database.html, Updated on: June 17, 2023
+
+***
+- The colour of a point is determined by the number of ingredients in the chocolate bar.
+Each point, representing one type of chocolate bar, will show the percentage of cocoa, 
+the ratings and the number of ingredients when hover.
+
+- The distribution is denser at the range from 60% to 85% of cocoa percentage with the ratings 
+ranged from 2.00 to 4.00 despite the number of ingredients in the chocolate bars.
+
+- To check on the cocoa percentage together with the ratings for a specific of number of ingredients, 
+click at the legend to hide the undesired number and get a clearer view.
+
+- Example: With 1 ingredient which is definitely cocoa only, the percentage is 100% for all chocolate bars. 
+The ratings for these dark chocolates are 2.50, 2.75, 3.00 and 3.50 as shown in the plot.
+
+
+### Characteristics by Country of Origin
+
+```{r include=FALSE}
+# Load data
+chocolate <- read.csv("choco_bar.csv")
+
+# Select columns
+c_choco <- chocolate[, c("Origin", "Characteristics")]
+
+# Split the Characteristics into individual words
+c_choco <- unnest_tokens(c_choco, word, Characteristics)
+
+# Remove the word "cocoa" and stop words
+c_choco <- c_choco[!c_choco$word == "cocoa",]
+c_choco <- c_choco %>% anti_join(stop_words)
+
+# colour palette
+pal <- colorRampPalette(c("#3F2305", "#FFF8D5"))(30)
+
+origin <- as.list(unique(c_choco$Origin))
+```
+
+```{r}
+selectInput("origin", label = "Select the Origin of Cocoa Beans:",
+            choices = origin, selected = "Colombia")
+```
+
+```{r}
+renderWordcloud2({
+  c_origin <- c_choco[c_choco$Origin == input$origin,]
+  c_data <- c_origin %>% count(word, sort = TRUE)
+  wordcloud2(data = c_data, size = 0.8, color = pal, shuffle = F,
+           rotateRatio = 0, shape = "rectangle")
+})
+
+```
+
+
+> 
+> Source of data: Flavors of Cacao, Retrieved from: http://flavorsofcacao.com/chocolate_database.html, Updated on: June 17, 2023
+
+***
+- The words shown in the figure is the most memorable characteristics of 
+chocolate bars made from the cocoa beans from the selected country of origin. 
+Terms generally relate to anything from texture, flavor, overall opinion, etc.
+
+- Darker font color and bigger font size indicates the word is highly used to
+describe the bars as compared to others.
+
+- Example: For chocolate bars made from the cocoa beans from Colombia, 
+the most frequent words used to describe the characteristics are 
+"marshmallow" (16 times), "nutty" (16 times), "sweet" (13 times) and "fruit" (9 times).
+
+
+Malaysia {.storyboard}
+====================================== 
+ 
+### Export of Cocoa Beans by Malaysia
+
+```{r include=FALSE}
+export <- read.csv("export_beans.csv")
+
+```
+
+```{r}
+renderPlotly({
+  # axes
+  f1 <- list(size = 18)
+  f2 <- list(size = 16)
+  x <- list(title = "Year", titlefont = f1, tickfont = f2)
+  y <- list(titlefont = f1, tickfont = f2)
+
+  # title
+  f3 <- list(size = 20)
+  t <- list(text = "Export Amount of Cocoa Beans by Quantity, Value & FOB",
+            font = f3)
+
+  # legends
+  l <- list(x = 0.85, font = list(size = 12),
+            title = list(text='<b> Export: </b>'))
+
+  # hover
+  h <- list(bgcolor = "lightyellow", bordercolor = "chocolate",
+            font = list(color="black"))
+  
+  subplot(
+  plot_ly(export, x = ~Year, y = ~Quantity,
+          text = ~paste("Year: ", Year,
+                        "<br>Export Quantity:", Quantity, "Tonne"),
+          hoverinfo = "text", height = 700) %>% 
+    add_lines(name="Quantity (Tonne)") %>%
+    layout(yaxis = y),
+  plot_ly(export, x = ~Year, y = ~Value,
+          text = ~paste("Year: ", Year,
+                        "<br>Export Value: RM", Value, "k"),
+          hoverinfo = "text", height = 700) %>% 
+    add_lines(name="Value (RM'000)") %>%
+    layout(yaxis = y),
+  plot_ly(export, x = ~Year, y = ~FOB,
+          text = ~paste("Year: ", Year,
+                        "<br>Export FOB: RM", FOB, "/Tonne"),
+          hoverinfo = "text", height = 700) %>% 
+    add_lines(name="FOB (RM/Tonne)") %>%
+    layout(yaxis = y),
+  nrows = 3, shareX = TRUE, widths = 0.6) |>
+  layout(title = t, xaxis = x, legend = l,
+         hoverlabel = h, hovermode = "x unified",
+         margin = list(l = 10, r = 10, b = 50, t = 80, pad = 2))
+})
+```
+
+> 
+> Source of data: Department of Statistics Malaysia, Retrieved from: https://www.koko.gov.my/lkm/industry/statistic/export.cfm
+
+***
+- The plots show the export of cocoa beans by Malaysia in terms of quantity, 
+monetary value and Free on Board (FOB).
+
+- With constant quantity, FOB increases as the monetary value increases.
+With static monetary value, FOB decreases as the quantity increases.
+
+- The data collected is from 1992 until 2022. 
+The exports decreased since 1992 but increased from 2010 to 2022 due to re-export.
+
+- Malaysia hit the highest quantity and value of exports in 2018 with 
+155,572 tonne of cocoa beans at RM 1,426,805,000. 
+
+- The highest FOB recorded was RM 12,594/tonne in 2016.
+
+
+### Import of Cocoa Beans by Malaysia
+
+```{r include=FALSE}
+import <- read.csv("import_beans.csv")
+
+```
+
+```{r}
+renderPlotly({
+  
+  # axes
+  f1 <- list(size = 18)
+  f2 <- list(size = 16)
+  x <- list(title = "Year", titlefont = f1, tickfont = f2)
+  y <- list(titlefont = f1, tickfont = f2)
+
+  # title
+  f3 <- list(size = 20)
+  t <- list(text = "Import Amount of Cocoa Beans by Quantity, Value & CIF",
+            font = f3)
+
+  # legends
+  l <- list(x = 0.85, font = list(size = 12),
+            title = list(text='<b> Import: </b>'))
+
+  # hover
+  h <- list(bgcolor = "lightyellow", bordercolor = "chocolate",
+            font = list(color="black"))
+
+  subplot(
+  plot_ly(import, x = ~Year, y = ~Quantity,
+          text = ~paste("Year: ", Year,
+                        "<br>Import Quantity:", Quantity, "Tonne"),
+          hoverinfo = "text", height = 700) %>% 
+    add_lines(name="Quantity (Tonne)") %>%
+    layout(yaxis = y),
+  plot_ly(import, x = ~Year, y = ~Value,
+          text = ~paste("Year: ", Year,
+                        "<br>Import Value: RM", Value, "k"),
+          hoverinfo = "text", height = 700) %>% 
+    add_lines(name="Value (RM'000)") %>%
+    layout(yaxis = y),
+  plot_ly(import, x = ~Year, y = ~CIF,
+          text = ~paste("Year: ", Year,
+                        "<br>Import CIF: RM", CIF, "/Tonne"),
+          hoverinfo = "text", height = 700) %>% 
+    add_lines(name="CIF (RM/Tonne)") %>%
+    layout(yaxis = y),
+  nrows = 3, shareX = TRUE, widths = 0.6) |>
+  layout(title = t, xaxis = x, legend = l,
+         hoverlabel = h, hovermode = "x unified",
+         margin = list(l = 10, r = 10, b = 50, t = 80, pad = 2))
+})
+```
+
+> 
+> Source of data: Department of Statistics Malaysia, Retrieved from: https://www.koko.gov.my/lkm/industry/statistic/import.cfm
+
+***
+- The plots show the import of cocoa beans by Malaysia in terms of quantity, 
+monetary value and Cost, Insurance and Freight (CIF).
+
+- With constant quantity, CIF increases as the monetary value increases.
+With static monetary value, CIF decreases as the quantity increases.
+
+- The graph shows the import index from 1992 to 2022. 
+The imports increased since 1992, a sudden drop in 2009 and started to rise again after 2016.
+
+- Highest quantity at 523,926 tonne of cocoa beans were imported by Malaysia in 2008 
+and reached the highest import value of RM 5,010,786,000 in 2021
+
+- The highest CIF recorded was RM 12,688/tonne in 2016.
+
+
+
+### Production (Tonne) Of Cocoa Beans By Region in Malaysia
+
+```{r include=FALSE}
+region <- read.csv("region_data.csv")
+region <- region %>% 
+  pivot_longer(cols = c("West_Msia", "Sabah", "Sarawak", "Total"),
+               names_to = "Region", values_to = "Production")
+region <- as.data.frame(region)
+region <- region %>% 
+  mutate(Region = factor(Region, levels = c("West_Msia", "Sabah", "Sarawak", "Total")))
+
+reg_col <- c("#eda268", "#8f3e00", "#583101", "#9ba2ff")
+
+p <-
+  ggplot(region, aes(x = Year, y = Production, colour = Region)) + 
+  geom_line(size = 1) +
+  scale_colour_manual(values = reg_col) +
+  labs(x = "Year", y = "Production (Tonne)",
+       title = "Production of Cocoa Beans in Malaysia",
+       colour = "Region") +
+  theme(plot.title = element_text(face = "bold", colour = "chocolate4", size = 22),
+        plot.margin = margin(2, 1, 2, 1, "cm"), #(top, right, bottom, left, "unit")
+        axis.text.x = element_text(face = "bold", size = 12),
+        axis.text.y = element_text(face = "bold", size = 16),
+        axis.title = element_text(face = "bold", colour = "chocolate4", size = 18),
+        legend.title = element_text(face = "bold", colour = "chocolate4", size = 12),
+        legend.text = element_text(size = 12),
+        panel.grid.major = element_line(colour = "bisque"),
+        panel.grid.minor = element_line(colour = "bisque"),
+        panel.background = element_rect(fill = "white"))
+```
+
+```{r}
+renderPlotly({
+  ggplotly(p, tooltip = "all", dynamicTicks = TRUE, width = 1000) %>%
+    layout(hovermode = "x unified")
+})
+```
+
+> 
+> Source of data: Department of Statistic Malaysia, Malaysia Cocoa Board, Retrieved from: https://www.koko.gov.my/lkm/industry/statistic/p_cocoabean.cfm
+
+***
+- The statistics of regional production of cocoa beans are shown in the figure. 
+The production value in 2022 is the estimated value.
+
+- The production increased from 1980 and reached its highest point 
+at the total production of 80,800 tonne in 1990.
+The amount dropped since then and currently getting lower which was not more than 500 tonne in 2022.
+
+- Sabah contributed the most in the total production as compared to West Malaysia and Sarawak.
+
+### Conclusion
+
+- The increase in worldwide production of cocoa beans allows 
+more type of chocolate bars and products to be introduced to the market.
+
+- In general, people still prefer the percentage of cocoa between 60% to 85% 
+and chocolate bars with two or three main ingredients. 
+Not too pure for bitterness but not too sweet as well.
+
+- Due to the decrease in cocoa plantation, the import is always higher than the export in Malaysia.
+
+- This situation indicates that Malaysia is spending more for imports of cocoa beans than the gains from exports.
